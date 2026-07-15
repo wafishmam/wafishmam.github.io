@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Wafi — Software Engineer</title>
+<title>Wafi | Software Engineer</title>
 <meta name="description" content="Software engineer building live news experiences. React, TypeScript, Next.js, AWS, and AI-native systems." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -41,7 +41,6 @@
   }
   .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
 
-  /* ---------- Live ticker ---------- */
   .ticker{
     background:var(--ink);
     color:#EDEEE9;
@@ -96,7 +95,6 @@
     .reveal{opacity:1 !important;transform:none !important;transition:none !important}
   }
 
-  /* ---------- Nav ---------- */
   nav{
     border-bottom:1px solid var(--hairline);
     background:var(--paper);
@@ -123,7 +121,6 @@
   }
   .nav-links a:hover{color:var(--ink);text-decoration:none}
 
-  /* ---------- Hero ---------- */
   header.hero{padding:96px 0 84px}
   .hero h1{
     font-family:var(--display);
@@ -141,7 +138,6 @@
     color:var(--ink-soft);
     font-size:18px;
   }
-  /* Broadcast lower-third nameplate */
   .lower-third{
     display:inline-flex;
     align-items:stretch;
@@ -182,7 +178,6 @@
   .btn.primary{background:var(--ink);color:var(--paper)}
   .btn.primary:hover{background:var(--live-red);border-color:var(--live-red)}
 
-  /* ---------- Sections ---------- */
   section{padding:72px 0;border-top:1px solid var(--hairline)}
   .eyebrow{
     font-family:var(--mono);
@@ -201,7 +196,6 @@
     margin-bottom:34px;
   }
 
-  /* ---------- Featured ---------- */
   .featured-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
   .feature-card{
     background:var(--card);
@@ -236,7 +230,6 @@
     font-size:13px;
   }
 
-  /* ---------- Repos ---------- */
   .repo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
   .repo-card{
     background:var(--card);
@@ -268,7 +261,6 @@
   .lang-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
   .repos-status{font-family:var(--mono);font-size:13px;color:var(--gray)}
 
-  /* ---------- About ---------- */
   .about-cols{display:grid;grid-template-columns:1.5fr 1fr;gap:48px}
   .about-cols p{color:var(--ink-soft);margin-bottom:16px}
   .stack-list{list-style:none;display:flex;flex-direction:column;gap:10px}
@@ -278,7 +270,6 @@
   }
   .stack-list li span{color:var(--gray);display:block;font-size:11px;letter-spacing:.12em;margin-bottom:2px}
 
-  /* ---------- Contact / footer ---------- */
   footer{
     border-top:1px solid var(--hairline);
     padding:64px 0 48px;
@@ -295,7 +286,6 @@
     gap:8px;
   }
 
-  /* ---------- Reveal on scroll ---------- */
   .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease, transform .5s ease}
   .reveal.in{opacity:1;transform:none}
 
@@ -313,7 +303,6 @@
 </head>
 <body>
 
-<!-- ══════════ LIVE GITHUB TICKER ══════════ -->
 <div class="ticker" role="marquee" aria-label="Recent GitHub activity">
   <div class="ticker-label"><span class="live-dot" aria-hidden="true"></span>LIVE</div>
   <div class="ticker-track" id="tickerTrack">
@@ -346,8 +335,11 @@
     <p class="hero-sub">
       I'm a full-stack software engineer at NBCUniversal, where I build election coverage
       and interactive products for NBCNews.com and Telemundo.com. I work across React,
-      TypeScript, Next.js, and AWS — and lately, AI-native systems that put language models
-      into real production pipelines.
+      TypeScript, Next.js, and AWS. I'm also deeply interested in AI, especially in finding
+      practical ways it can boost productivity and make everyday work easier. On the side,
+      I build AI-powered projects that put language models to work. Most recently, I built 
+      a research agent that investigates news topics, and I'm currently developing a sentiment 
+      dashboard that ingests articles and scores how coverage is trending."
     </p>
     <div class="hero-links">
       <a class="btn primary" href="#work">See my work</a>
@@ -357,16 +349,14 @@
   </div>
 </header>
 
-<!-- ══════════ FEATURED ══════════ -->
 <section id="work">
   <div class="wrap">
     <p class="eyebrow reveal">FEATURED WORK</p>
-    <h2 class="reveal">Projects I'd show first</h2>
-    <div class="featured-grid" id="featuredGrid"><!-- populated by JS --></div>
+    <h2 class="reveal">Top stories</h2>
+    <div class="featured-grid" id="featuredGrid"></div>
   </div>
 </section>
 
-<!-- ══════════ ALL REPOS ══════════ -->
 <section id="repos">
   <div class="wrap">
     <p class="eyebrow reveal">FROM GITHUB</p>
@@ -376,7 +366,6 @@
   </div>
 </section>
 
-<!-- ══════════ ABOUT ══════════ -->
 <section id="about">
   <div class="wrap">
     <p class="eyebrow reveal">ABOUT</p>
@@ -390,10 +379,11 @@
           on NBCNews.com and Telemundo.com during the biggest traffic nights of the year.
         </p>
         <p>
-          That work means shipping software where "live" isn't a buzzword — event-driven
+          That work means shipping software where "live" isn't a buzzword: event-driven
           pipelines, static API patterns over S3, islands architecture for pages that have
-          to stay fast under load. Outside of work I build AI-native tools end to end,
-          from LangGraph agents to sentiment pipelines on AWS SQS.
+          to stay fast under load. Outside of work I like building AI-powered tools end to end,
+          like a LangGraph research agent and a sentiment dashboard fed by AWS SQS, to keep
+          learning how these systems fit together.
         </p>
         <p>
           Off the clock: DIY hardware projects, a self-directed system design curriculum,
@@ -410,7 +400,6 @@
   </div>
 </section>
 
-<!-- ══════════ CONTACT ══════════ -->
 <footer id="contact">
   <div class="wrap">
     <p class="eyebrow reveal">CONTACT</p>
@@ -432,18 +421,15 @@
 </footer>
 
 <script>
-/* ════════════════════════════════════════════════════════
-                         CONFIG
-   ════════════════════════════════════════════════════════ */
 const CONFIG = {
-  githubUsername: "wafishmam",
+  githubUsername: "wafishmam", 
   linkedinUrl:    "https://www.linkedin.com/in/wafi-ishmam-240146199/",
   email:          "wafishmam@gmail.com",
 
-  // Repo names to pin in Featured Work
+  // pinned repos
   featured: [
     {
-      repo: "news-agent",
+      repo: "news-research-agent",
       title: "News Research Agent",
       blurb: "An agentic research assistant for news topics. Built with LangGraph orchestration, ChromaDB retrieval, Tavily search, and Claude Haiku, served by a FastAPI backend with a lightweight React frontend.",
       tags: ["LangGraph", "ChromaDB", "FastAPI", "React", "Claude"]
@@ -457,7 +443,18 @@ const CONFIG = {
   ],
 
   // Repos to hide from the auto-generated grid (forks are excluded automatically)
-  excludeRepos: []
+  excludeRepos: [
+    "wafishmam.github.io",
+    "banking-auth-system",
+    "UCL-2020-21",
+    "UCL",
+    "Flask-project",
+    "buzzfeed",
+    "vip-project",
+    "CPX-code",
+    "calculator_project",
+    "First-Web-Page"
+  ]
 };
 
 const LANG_COLORS = {
@@ -477,7 +474,6 @@ function relTime(iso){
   return Math.floor(s/2592000) + "mo ago";
 }
 
-/* ── Wire static links ── */
 (function(){
   const gh = "https://github.com/" + CONFIG.githubUsername;
   for (const id of ["ghHeroLink","ghFootLink"]) document.getElementById(id).href = gh;
@@ -486,7 +482,6 @@ function relTime(iso){
   document.getElementById("footYear").textContent = "© " + new Date().getFullYear() + " Wafi";
 })();
 
-/* ── Featured cards ── */
 (function(){
   const grid = document.getElementById("featuredGrid");
   grid.innerHTML = CONFIG.featured.map(f => `
@@ -498,7 +493,6 @@ function relTime(iso){
     </article>`).join("");
 })();
 
-/* ── Live ticker: recent public GitHub events ── */
 (async function(){
   const track = document.getElementById("tickerTrack");
   try{
@@ -530,13 +524,12 @@ function relTime(iso){
     }
     track.innerHTML = items.length
       ? items.join("")
-      : `<span class="ticker-item">Quiet on the wire — check back soon.</span>`;
+      : `<span class="ticker-item">Quiet on the wire. Check back soon.</span>`;
   } catch {
-    track.innerHTML = `<span class="ticker-item">Live feed unavailable — see the repos below.</span>`;
+    track.innerHTML = `<span class="ticker-item">Live feed unavailable. See the repos below.</span>`;
   }
 })();
 
-/* ── Auto-fetched repo grid ── */
 (async function(){
   const grid = document.getElementById("repoGrid");
   const status = document.getElementById("repoStatus");
@@ -562,11 +555,10 @@ function relTime(iso){
     }).join("");
     observeReveals();
   } catch {
-    status.textContent = "Couldn't load repositories from GitHub right now — visit github.com/" + CONFIG.githubUsername + " instead.";
+    status.textContent = "Couldn't load repositories from GitHub right now. Visit github.com/" + CONFIG.githubUsername + " instead.";
   }
 })();
 
-/* ── Scroll reveals ── */
 function observeReveals(){
   const els = document.querySelectorAll(".reveal:not(.in)");
   if (!("IntersectionObserver" in window) ||
