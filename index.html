@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wafi — Software Engineer</title>
+<meta name="description" content="Software engineer building live news experiences. React, TypeScript, Next.js, AWS, and AI-native systems." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#F7F7F4;
+    --ink:#14161A;
+    --ink-soft:#4A4F58;
+    --gray:#8A8F98;
+    --hairline:#DDDED8;
+    --live-red:#D6323C;
+    --signal-blue:#2B4ACB;
+    --card:#FFFFFF;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+    --display:'Archivo', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--signal-blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--signal-blue);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+
+  /* ---------- Live ticker ---------- */
+  .ticker{
+    background:var(--ink);
+    color:#EDEEE9;
+    font-family:var(--mono);
+    font-size:12.5px;
+    overflow:hidden;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    height:38px;
+  }
+  .ticker-label{
+    flex:none;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 16px;
+    height:100%;
+    background:var(--live-red);
+    color:#fff;
+    font-weight:500;
+    letter-spacing:.12em;
+    z-index:2;
+  }
+  .live-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#fff;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.35;transform:scale(.75)}
+  }
+  .ticker-track{
+    display:inline-block;
+    padding-left:100%;
+    animation:ticker 42s linear infinite;
+  }
+  .ticker:hover .ticker-track{animation-play-state:paused}
+  @keyframes ticker{
+    0%{transform:translateX(0)}
+    100%{transform:translateX(-100%)}
+  }
+  .ticker-item{margin-right:56px}
+  .ticker-item .t-type{color:#9FE870;margin-right:10px}
+  .ticker-item .t-time{color:#8A8F98;margin-left:10px}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    .live-dot{animation:none}
+    .ticker-track{animation:none;padding-left:16px}
+    .reveal{opacity:1 !important;transform:none !important;transition:none !important}
+  }
+
+  /* ---------- Nav ---------- */
+  nav{
+    border-bottom:1px solid var(--hairline);
+    background:var(--paper);
+  }
+  .nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:60px;
+  }
+  .nav-name{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.14em;
+    color:var(--ink);
+    font-weight:500;
+  }
+  .nav-links{display:flex;gap:26px;list-style:none}
+  .nav-links a{
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+  }
+  .nav-links a:hover{color:var(--ink);text-decoration:none}
+
+  /* ---------- Hero ---------- */
+  header.hero{padding:96px 0 84px}
+  .hero h1{
+    font-family:var(--display);
+    font-weight:900;
+    font-stretch:110%;
+    font-size:clamp(2.6rem, 6.4vw, 4.6rem);
+    line-height:1.02;
+    letter-spacing:-.015em;
+    max-width:15ch;
+  }
+  .hero h1 .accent{color:var(--live-red)}
+  .hero-sub{
+    margin-top:28px;
+    max-width:56ch;
+    color:var(--ink-soft);
+    font-size:18px;
+  }
+  /* Broadcast lower-third nameplate */
+  .lower-third{
+    display:inline-flex;
+    align-items:stretch;
+    margin-bottom:34px;
+    box-shadow:0 1px 2px rgba(20,22,26,.08);
+  }
+  .lower-third .bar{width:6px;background:var(--live-red)}
+  .lower-third .plate{
+    background:var(--ink);
+    color:#fff;
+    padding:10px 18px 11px;
+  }
+  .lower-third .plate .name{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:.02em;
+  }
+  .lower-third .plate .role{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#B9BDC4;
+    letter-spacing:.1em;
+    margin-top:1px;
+  }
+  .hero-links{margin-top:34px;display:flex;flex-wrap:wrap;gap:14px}
+  .btn{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.05em;
+    padding:11px 20px;
+    border:1px solid var(--ink);
+    border-radius:3px;
+    color:var(--ink);
+    transition:background .15s, color .15s;
+  }
+  .btn:hover{background:var(--ink);color:var(--paper);text-decoration:none}
+  .btn.primary{background:var(--ink);color:var(--paper)}
+  .btn.primary:hover{background:var(--live-red);border-color:var(--live-red)}
+
+  /* ---------- Sections ---------- */
+  section{padding:72px 0;border-top:1px solid var(--hairline)}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.18em;
+    color:var(--live-red);
+    font-weight:500;
+    margin-bottom:14px;
+  }
+  h2{
+    font-family:var(--display);
+    font-weight:800;
+    font-stretch:105%;
+    font-size:clamp(1.7rem, 3.4vw, 2.3rem);
+    letter-spacing:-.01em;
+    margin-bottom:34px;
+  }
+
+  /* ---------- Featured ---------- */
+  .featured-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .feature-card{
+    background:var(--card);
+    border:1px solid var(--hairline);
+    border-radius:6px;
+    padding:28px;
+    display:flex;
+    flex-direction:column;
+    transition:border-color .15s, transform .15s;
+  }
+  .feature-card:hover{border-color:var(--ink);transform:translateY(-2px)}
+  .feature-card h3{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:1.25rem;
+    margin-bottom:10px;
+  }
+  .feature-card p{color:var(--ink-soft);font-size:15.5px;flex:1}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .tag{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-soft);
+    border:1px solid var(--hairline);
+    border-radius:3px;
+    padding:3px 9px;
+    background:var(--paper);
+  }
+  .feature-card .card-link{
+    margin-top:18px;
+    font-family:var(--mono);
+    font-size:13px;
+  }
+
+  /* ---------- Repos ---------- */
+  .repo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .repo-card{
+    background:var(--card);
+    border:1px solid var(--hairline);
+    border-radius:6px;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    color:inherit;
+    transition:border-color .15s;
+  }
+  .repo-card:hover{border-color:var(--ink);text-decoration:none}
+  .repo-card .r-name{
+    font-family:var(--mono);
+    font-size:14px;
+    font-weight:500;
+    color:var(--signal-blue);
+    word-break:break-word;
+  }
+  .repo-card .r-desc{
+    font-size:14px;color:var(--ink-soft);flex:1;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .repo-meta{
+    display:flex;gap:14px;align-items:center;
+    font-family:var(--mono);font-size:11.5px;color:var(--gray);
+  }
+  .lang-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .repos-status{font-family:var(--mono);font-size:13px;color:var(--gray)}
+
+  /* ---------- About ---------- */
+  .about-cols{display:grid;grid-template-columns:1.5fr 1fr;gap:48px}
+  .about-cols p{color:var(--ink-soft);margin-bottom:16px}
+  .stack-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .stack-list li{
+    font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+    padding-bottom:10px;border-bottom:1px solid var(--hairline);
+  }
+  .stack-list li span{color:var(--gray);display:block;font-size:11px;letter-spacing:.12em;margin-bottom:2px}
+
+  /* ---------- Contact / footer ---------- */
+  footer{
+    border-top:1px solid var(--hairline);
+    padding:64px 0 48px;
+  }
+  .contact-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px}
+  .foot-note{
+    margin-top:56px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--gray);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  /* ---------- Reveal on scroll ---------- */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease, transform .5s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media (max-width:820px){
+    .featured-grid{grid-template-columns:1fr}
+    .repo-grid{grid-template-columns:1fr 1fr}
+    .about-cols{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .repo-grid{grid-template-columns:1fr}
+    header.hero{padding:64px 0 56px}
+    .nav-links{gap:16px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LIVE GITHUB TICKER ══════════ -->
+<div class="ticker" role="marquee" aria-label="Recent GitHub activity">
+  <div class="ticker-label"><span class="live-dot" aria-hidden="true"></span>LIVE</div>
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-item">Loading recent GitHub activity…</span>
+  </div>
+</div>
+
+<nav>
+  <div class="wrap nav-inner">
+    <span class="nav-name">WAFI</span>
+    <ul class="nav-links">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#repos">Repos</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="lower-third" aria-hidden="true">
+      <div class="bar"></div>
+      <div class="plate">
+        <div class="name">WAFI</div>
+        <div class="role">SOFTWARE ENGINEER · NEW YORK / NJ</div>
+      </div>
+    </div>
+    <h1>Building <span class="accent">live</span> news experiences for millions of viewers.</h1>
+    <p class="hero-sub">
+      I'm a full-stack software engineer at NBCUniversal, where I build election coverage
+      and interactive products for NBCNews.com and Telemundo.com. I work across React,
+      TypeScript, Next.js, and AWS — and lately, AI-native systems that put language models
+      into real production pipelines.
+    </p>
+    <div class="hero-links">
+      <a class="btn primary" href="#work">See my work</a>
+      <a class="btn" id="ghHeroLink" href="#" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn" id="liHeroLink" href="#" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ FEATURED ══════════ -->
+<section id="work">
+  <div class="wrap">
+    <p class="eyebrow reveal">FEATURED WORK</p>
+    <h2 class="reveal">Projects I'd show first</h2>
+    <div class="featured-grid" id="featuredGrid"><!-- populated by JS --></div>
+  </div>
+</section>
+
+<!-- ══════════ ALL REPOS ══════════ -->
+<section id="repos">
+  <div class="wrap">
+    <p class="eyebrow reveal">FROM GITHUB</p>
+    <h2 class="reveal">All public repositories</h2>
+    <p class="repos-status" id="repoStatus">Loading repositories…</p>
+    <div class="repo-grid" id="repoGrid"></div>
+  </div>
+</section>
+
+<!-- ══════════ ABOUT ══════════ -->
+<section id="about">
+  <div class="wrap">
+    <p class="eyebrow reveal">ABOUT</p>
+    <h2 class="reveal">Behind the byline</h2>
+    <div class="about-cols">
+      <div class="reveal">
+        <p>
+          I spent the last two years in NBCUniversal's Media Tech Associate program on the
+          software engineering track, finishing on the Live &amp; Interactive Experiences team
+          within News Digital. There, I helped build the election coverage products that run
+          on NBCNews.com and Telemundo.com during the biggest traffic nights of the year.
+        </p>
+        <p>
+          That work means shipping software where "live" isn't a buzzword — event-driven
+          pipelines, static API patterns over S3, islands architecture for pages that have
+          to stay fast under load. Outside of work I build AI-native tools end to end,
+          from LangGraph agents to sentiment pipelines on AWS SQS.
+        </p>
+        <p>
+          Off the clock: DIY hardware projects, a self-directed system design curriculum,
+          and getting married this summer.
+        </p>
+      </div>
+      <ul class="stack-list reveal">
+        <li><span>FRONTEND</span>React · TypeScript · Next.js · Astro · Angular</li>
+        <li><span>BACKEND</span>Node.js · Java Spring Boot · Python · GraphQL</li>
+        <li><span>CLOUD &amp; INFRA</span>AWS (SQS, S3) · Ansible · Railway</li>
+        <li><span>AI SYSTEMS</span>LangGraph · Claude API · ChromaDB · FastAPI</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONTACT ══════════ -->
+<footer id="contact">
+  <div class="wrap">
+    <p class="eyebrow reveal">CONTACT</p>
+    <h2 class="reveal">Let's talk</h2>
+    <p class="reveal" style="color:var(--ink-soft);max-width:52ch">
+      I'm open to full-stack and frontend engineering roles. The fastest way to reach me
+      is email or LinkedIn.
+    </p>
+    <div class="contact-links reveal">
+      <a class="btn primary" id="emailLink" href="#">Email me</a>
+      <a class="btn" id="liFootLink" href="#" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn" id="ghFootLink" href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="foot-note">
+      <span id="footYear"></span>
+      <span>Designed &amp; built by Wafi. No template.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ════════════════════════════════════════════════════════
+                         CONFIG
+   ════════════════════════════════════════════════════════ */
+const CONFIG = {
+  githubUsername: "wafishmam",
+  linkedinUrl:    "https://www.linkedin.com/in/wafi-ishmam-240146199/",
+  email:          "wafishmam@gmail.com",
+
+  // Repo names to pin in Featured Work
+  featured: [
+    {
+      repo: "news-agent",
+      title: "News Research Agent",
+      blurb: "An agentic research assistant for news topics. Built with LangGraph orchestration, ChromaDB retrieval, Tavily search, and Claude Haiku, served by a FastAPI backend with a lightweight React frontend.",
+      tags: ["LangGraph", "ChromaDB", "FastAPI", "React", "Claude"]
+    },
+    {
+      repo: "content-pulse",
+      title: "Content Pulse",
+      blurb: "A media sentiment dashboard that ingests articles through AWS SQS, scores them with Claude Haiku, and visualizes trends in a React/Vite frontend over SQLite.",
+      tags: ["FastAPI", "AWS SQS", "Claude", "SQLite", "React"]
+    }
+  ],
+
+  // Repos to hide from the auto-generated grid (forks are excluded automatically)
+  excludeRepos: []
+};
+
+const LANG_COLORS = {
+  JavaScript:"#f1e05a", TypeScript:"#3178c6", Python:"#3572A5", Java:"#b07219",
+  HTML:"#e34c26", CSS:"#563d7c", Astro:"#ff5a03", Shell:"#89e051", Go:"#00ADD8",
+  Rust:"#dea584", "Jupyter Notebook":"#DA5B0B", Vue:"#41b883", C:"#555555",
+  "C++":"#f34b7d", "C#":"#178600", Ruby:"#701516", Swift:"#F05138", Kotlin:"#A97BFF"
+};
+
+const esc = s => (s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function relTime(iso){
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 3600) return Math.max(1, Math.floor(s/60)) + "m ago";
+  if (s < 86400) return Math.floor(s/3600) + "h ago";
+  if (s < 2592000) return Math.floor(s/86400) + "d ago";
+  return Math.floor(s/2592000) + "mo ago";
+}
+
+/* ── Wire static links ── */
+(function(){
+  const gh = "https://github.com/" + CONFIG.githubUsername;
+  for (const id of ["ghHeroLink","ghFootLink"]) document.getElementById(id).href = gh;
+  for (const id of ["liHeroLink","liFootLink"]) document.getElementById(id).href = CONFIG.linkedinUrl;
+  document.getElementById("emailLink").href = "mailto:" + CONFIG.email;
+  document.getElementById("footYear").textContent = "© " + new Date().getFullYear() + " Wafi";
+})();
+
+/* ── Featured cards ── */
+(function(){
+  const grid = document.getElementById("featuredGrid");
+  grid.innerHTML = CONFIG.featured.map(f => `
+    <article class="feature-card reveal">
+      <h3>${esc(f.title)}</h3>
+      <p>${esc(f.blurb)}</p>
+      <div class="tags">${f.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+      <a class="card-link" href="https://github.com/${encodeURIComponent(CONFIG.githubUsername)}/${encodeURIComponent(f.repo)}" target="_blank" rel="noopener">View on GitHub →</a>
+    </article>`).join("");
+})();
+
+/* ── Live ticker: recent public GitHub events ── */
+(async function(){
+  const track = document.getElementById("tickerTrack");
+  try{
+    const r = await fetch(`https://api.github.com/users/${CONFIG.githubUsername}/events/public?per_page=15`);
+    if (!r.ok) throw new Error(r.status);
+    const events = await r.json();
+    const items = [];
+    for (const e of events){
+      const repo = e.repo?.name?.split("/")[1] ?? e.repo?.name ?? "";
+      let verb = null;
+      if (e.type === "PushEvent"){
+        const n = e.payload?.commits?.length ?? 0;
+        verb = `pushed ${n} commit${n === 1 ? "" : "s"} to ${repo}`;
+      } else if (e.type === "CreateEvent" && e.payload?.ref_type === "repository"){
+        verb = `created ${repo}`;
+      } else if (e.type === "PullRequestEvent"){
+        verb = `${e.payload?.action ?? "updated"} a pull request in ${repo}`;
+      } else if (e.type === "IssuesEvent"){
+        verb = `${e.payload?.action ?? "updated"} an issue in ${repo}`;
+      } else if (e.type === "WatchEvent"){
+        verb = `starred ${e.repo?.name ?? ""}`;
+      } else if (e.type === "ReleaseEvent"){
+        verb = `released ${e.payload?.release?.tag_name ?? ""} in ${repo}`;
+      }
+      if (verb) items.push(
+        `<span class="ticker-item"><span class="t-type">●</span>${esc(verb)}<span class="t-time">${relTime(e.created_at)}</span></span>`
+      );
+      if (items.length >= 8) break;
+    }
+    track.innerHTML = items.length
+      ? items.join("")
+      : `<span class="ticker-item">Quiet on the wire — check back soon.</span>`;
+  } catch {
+    track.innerHTML = `<span class="ticker-item">Live feed unavailable — see the repos below.</span>`;
+  }
+})();
+
+/* ── Auto-fetched repo grid ── */
+(async function(){
+  const grid = document.getElementById("repoGrid");
+  const status = document.getElementById("repoStatus");
+  try{
+    const r = await fetch(`https://api.github.com/users/${CONFIG.githubUsername}/repos?sort=pushed&per_page=100`);
+    if (!r.ok) throw new Error(r.status);
+    let repos = await r.json();
+    repos = repos.filter(x => !x.fork && !CONFIG.excludeRepos.includes(x.name));
+    if (!repos.length){ status.textContent = "No public repositories yet."; return; }
+    status.remove();
+    grid.innerHTML = repos.map(x => {
+      const color = LANG_COLORS[x.language] || "#B7BBC2";
+      return `
+      <a class="repo-card reveal" href="${esc(x.html_url)}" target="_blank" rel="noopener">
+        <span class="r-name">${esc(x.name)}</span>
+        <span class="r-desc">${esc(x.description || "No description yet.")}</span>
+        <span class="repo-meta">
+          ${x.language ? `<span><span class="lang-dot" style="background:${color}"></span>${esc(x.language)}</span>` : ""}
+          ${x.stargazers_count ? `<span>★ ${x.stargazers_count}</span>` : ""}
+          <span>updated ${relTime(x.pushed_at)}</span>
+        </span>
+      </a>`;
+    }).join("");
+    observeReveals();
+  } catch {
+    status.textContent = "Couldn't load repositories from GitHub right now — visit github.com/" + CONFIG.githubUsername + " instead.";
+  }
+})();
+
+/* ── Scroll reveals ── */
+function observeReveals(){
+  const els = document.querySelectorAll(".reveal:not(.in)");
+  if (!("IntersectionObserver" in window) ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    els.forEach(el => el.classList.add("in"));
+    return;
+  }
+  const io = new IntersectionObserver(entries => {
+    for (const en of entries){
+      if (en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+    }
+  }, { threshold: .12 });
+  els.forEach(el => io.observe(el));
+}
+observeReveals();
+</script>
+</body>
+</html>
