@@ -505,7 +505,7 @@ function relTime(iso){
       let verb = null;
       if (e.type === "PushEvent"){
         const n = e.payload?.commits?.length ?? 0;
-        verb = `pushed ${n} commit${n === 1 ? "" : "s"} to ${repo}`;
+        verb = `pushed ${n} commit${n <= 1 ? "" : "s"} to ${repo}`;
       } else if (e.type === "CreateEvent" && e.payload?.ref_type === "repository"){
         verb = `created ${repo}`;
       } else if (e.type === "PullRequestEvent"){
