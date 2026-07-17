@@ -504,8 +504,10 @@ function relTime(iso){
       const repo = e.repo?.name?.split("/")[1] ?? e.repo?.name ?? "";
       let verb = null;
       if (e.type === "PushEvent"){
-        const n = e.payload?.commits?.length ?? 0;
-        verb = `pushed ${n} commit${n <= 1 ? "" : "s"} to ${repo}`;
+        const n = e.payload?.size ?? e.payload?.commits?.length ?? 0;
+        verb = n > 0
+          ? `pushed ${n} commit${n === 1 ? "" : "s"} to ${repo}`
+          : `pushed to ${repo}`;
       } else if (e.type === "CreateEvent" && e.payload?.ref_type === "repository"){
         verb = `created ${repo}`;
       } else if (e.type === "PullRequestEvent"){
