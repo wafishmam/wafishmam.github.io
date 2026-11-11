@@ -1,0 +1,297 @@
+---
+import "@fontsource-variable/schibsted-grotesk";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/global.css";
+import { site, featured, excludeRepos, about, stack } from "../data/site";
+import { getGithubData } from "../lib/github";
+import { relTime, statusFor, STATUS_LABEL, type Status } from "../lib/feed";
+
+const gh = await getGithubData(site.githubUsername);
+const now = Date.now();
+const ghUrl = `https://github.com/${site.githubUsername}`;
+const byName = new Map(gh.repos.map((r) => [r.name, r]));
+
+type Row = {
+  pg: string;
+  slug: string;
+  url: string;
+  format: string;
+  status: Status | null;
+  pushedAt: string | null;
+  blurb?: string;
+  tags?: string[];
+};
+
+const featuredRows: Row[] = featured.map((f, i) => {
+  const r = byName.get(f.repo);
+  return {
+    pg: `A${i + 1}`,
+    slug: f.title,
+    url: r?.html_url ?? `${ghUrl}/${f.repo}`,
+    format: r?.language ?? f.tags[0],
+    status: r ? statusFor(r.pushed_at, now) : null,
+    pushedAt: r?.pushed_at ?? null,
+    blurb: f.blurb,
+    tags: f.tags,
+  };
+});
+
+const hidden = new Set([...excludeRepos, ...featured.map((f) => f.repo)]);
+const repoRows: Row[] = gh.repos
+  .filter((r) => !r.fork && !hidden.has(r.name))
+  .map((r, i) => ({
+    pg: `B${i + 1}`,
+    slug: r.name,
+    url: r.html_url,
+    format: r.language ?? "—",
+    status: statusFor(r.pushed_at, now),
+    pushedAt: r.pushed_at,
+    blurb: r.description ?? undefined,
+  }));
+
+const year = new Date(gh.fetchedAt).getFullYear();
+const builtOn = new Date(gh.fetchedAt).toLocaleDateString("en-US", {
+  month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York",
+});
+const title = `${site.name} | ${site.role}`;
+const ogImage = new URL("/og.png", Astro.site).href;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name,
+  jobTitle: site.role,
+  url: Astro.site?.href,
+  sameAs: [ghUrl, site.linkedinUrl],
+  worksFor: { "@type": "Organization", name: "NBCUniversal" },
+};
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={site.description} />
+  <link rel="canonical" href={Astro.site?.href} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#141d33" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={site.description} />
+  <meta property="og:url" content={Astro.site?.href} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+    <div class="wrap masthead-inner">
+      <a class="wordmark" href="#top" aria-label={`${site.name}, home`}>
+        <span class="wordmark-name">{site.name}</span>
+        <span class="wordmark-role">{site.role}</span>
+      </a>
+      <nav aria-label="Sections">
+        <ul>
+          <li><a href="#rundown">Rundown</a></li>
+          <li><a href="#bio">Bio</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <p class="clock" aria-label="Current time in New York">
+        <span class="tally-dot" aria-hidden="true"></span>
+        <span class="clock-zone">ET</span>
+        <time id="clock" class="clock-time">--:--:--</time>
+      </p>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="console" id="top" aria-labelledby="headline">
+      <div class="wrap console-grid">
+        <div class="console-copy">
+          <p class="slate">
+            <span class="slate-name">{site.name}</span>
+            <span class="slate-meta">{site.role} · {site.location}</span>
+          </p>
+          <h1 id="headline">Building <em>live</em> news experiences for millions of viewers.</h1>
+          <p class="lede">{site.intro}</p>
+          <p class="lede lede-2">{site.sideProjects}</p>
+          <div class="actions">
+            <a class="btn btn-solid" href="#rundown">See the work</a>
+            <a class="btn btn-ghost" href={ghUrl} rel="noopener">GitHub</a>
+            <a class="btn btn-ghost" href={site.linkedinUrl} rel="noopener">LinkedIn</a>
+          </div>
+        </div>
+
+        <figure class="monitor" aria-labelledby="wire-label">
+          <ol class="wire" id="wire" aria-live="polite" data-user={site.githubUsername}>
+            {gh.feed.length > 0 ? gh.feed.map((f) => (
+              <li>
+                <a href={f.url} rel="noopener">{f.text}</a>
+                <time datetime={f.at} data-at={f.at}>{relTime(f.at, now)}</time>
+              </li>
+            )) : (
+              <li class="wire-empty">
+                <span>The wire is quiet. Latest work is on <a href={ghUrl} rel="noopener">GitHub</a>.</span>
+              </li>
+            )}
+          </ol>
+          <figcaption class="monitor-label" id="wire-label">
+            <span class="monitor-src">PGM</span>
+            <span>GitHub wire</span>
+            <span class="monitor-state" id="wire-state">{gh.ok ? `as of ${builtOn}` : "offline"}</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="rundown" id="rundown" aria-labelledby="rundown-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="rundown-title">Rundown</h2>
+          <p class="section-note">
+            Featured segments first, then every public repo by last push.
+            Status comes from push recency: <span class="st st-live">On air</span> this fortnight,
+            <span class="st st-ready">Ready</span> within four months, <span class="st st-archive">Archive</span> before that.
+          </p>
+        </div>
+
+        <div class="sheet" role="table" aria-label="Projects">
+          <div class="sheet-row sheet-head" role="row">
+            <span role="columnheader">Pg</span>
+            <span role="columnheader">Slug</span>
+            <span role="columnheader">Format</span>
+            <span role="columnheader">Status</span>
+            <span role="columnheader" class="ta-r">Last push</span>
+          </div>
+
+          <div class="sheet-break" role="row"><span role="cell">A block · Featured</span></div>
+          {featuredRows.map((r) => (
+            <div class="sheet-row is-feature" role="row">
+              <span role="cell" class="pg">{r.pg}</span>
+              <span role="cell" class="slug">
+                <a href={r.url} rel="noopener" class="slug-link">{r.slug}</a>
+                <span class="blurb">{r.blurb}</span>
+                <span class="tags">{r.tags?.map((t) => <span class="tag">{t}</span>)}</span>
+              </span>
+              <span role="cell" class="fmt">{r.format}</span>
+              <span role="cell">{r.status ? <span class={`st st-${r.status}`}>{STATUS_LABEL[r.status]}</span> : <span class="muted">—</span>}</span>
+              <span role="cell" class="when ta-r">{r.pushedAt ? <time datetime={r.pushedAt} data-at={r.pushedAt}>{relTime(r.pushedAt, now)}</time> : "—"}</span>
+            </div>
+          ))}
+
+          <div class="sheet-break" role="row"><span role="cell">B block · All public repositories</span></div>
+          {repoRows.length > 0 ? repoRows.map((r) => (
+            <div class="sheet-row" role="row">
+              <span role="cell" class="pg">{r.pg}</span>
+              <span role="cell" class="slug">
+                <a href={r.url} rel="noopener" class="slug-link mono">{r.slug}</a>
+                {r.blurb && <span class="blurb blurb-sm">{r.blurb}</span>}
+              </span>
+              <span role="cell" class="fmt">{r.format}</span>
+              <span role="cell">{r.status && <span class={`st st-${r.status}`}>{STATUS_LABEL[r.status]}</span>}</span>
+              <span role="cell" class="when ta-r"><time datetime={r.pushedAt!} data-at={r.pushedAt!}>{relTime(r.pushedAt!, now)}</time></span>
+            </div>
+          )) : (
+            <div class="sheet-row sheet-empty" role="row">
+              <span role="cell">
+                {gh.ok ? "No other public repositories yet." : "GitHub didn't answer when this page was built."}
+                {" "}Browse everything at <a href={ghUrl} rel="noopener">github.com/{site.githubUsername}</a>.
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <section class="bio" id="bio" aria-labelledby="bio-title">
+      <div class="wrap bio-grid">
+        <div class="bio-copy">
+          <h2 id="bio-title">Behind the byline</h2>
+          {about.map((p) => <p>{p}</p>)}
+        </div>
+        <aside class="crew" aria-labelledby="crew-title">
+          <h3 id="crew-title">Tools on the desk</h3>
+          <dl>
+            {stack.map((s) => (
+              <div>
+                <dt>{s.label}</dt>
+                <dd>{s.items.join(" · ")}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="signoff" id="contact" aria-labelledby="contact-title">
+      <div class="wrap">
+        <h2 id="contact-title">Let's talk.</h2>
+        <p>I'm open to full-stack and frontend engineering roles. The fastest way to reach me is email or LinkedIn.</p>
+        <div class="actions">
+          <a class="btn btn-solid btn-lg" href={`mailto:${site.email}`}>Email me</a>
+          <a class="btn btn-line btn-lg" href={site.linkedinUrl} rel="noopener">LinkedIn</a>
+          <a class="btn btn-line btn-lg" href={ghUrl} rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="credits">
+    <div class="wrap credits-inner">
+      <span>© {year} {site.name}</span>
+      <span>Rundown generated {builtOn} from the GitHub API · Built with Astro</span>
+    </div>
+  </footer>
+
+  <script>
+    import { eventsToFeed, relTime } from "../lib/feed";
+
+    // ET clock — the one thing on the page that ticks every second.
+    const clock = document.getElementById("clock");
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "America/New_York",
+    });
+    const tick = () => { if (clock) clock.textContent = fmt.format(new Date()); };
+    tick();
+    setInterval(tick, 1000);
+
+    // Build-time relative times go stale between deploys; recompute in the browser.
+    const refreshTimes = () =>
+      document.querySelectorAll<HTMLElement>("[data-at]").forEach((el) => {
+        el.textContent = relTime(el.dataset.at!);
+      });
+    refreshTimes();
+
+    // Pull the wire fresh (unauthenticated: 60 req/hr per visitor IP — plenty).
+    (async () => {
+      const wire = document.getElementById("wire");
+      const state = document.getElementById("wire-state");
+      if (!wire) return;
+      try {
+        const res = await fetch(`https://api.github.com/users/${wire.dataset.user}/events/public?per_page=30`);
+        if (!res.ok) return;
+        const items = eventsToFeed(await res.json());
+        if (!items.length) return;
+        wire.replaceChildren(...items.map((f) => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = f.url; a.rel = "noopener"; a.textContent = f.text;
+          const t = document.createElement("time");
+          t.dateTime = f.at; t.dataset.at = f.at; t.textContent = relTime(f.at);
+          li.append(a, t);
+          return li;
+        }));
+        wire.classList.add("is-fresh");
+        if (state) state.textContent = "live";
+        document.querySelector(".monitor")?.classList.add("on-air");
+      } catch { /* keep the build-time snapshot */ }
+    })();
+  </script>
+</body>
+</html>
