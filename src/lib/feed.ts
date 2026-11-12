@@ -66,7 +66,7 @@ export type Status = "live" | "ready" | "archive";
 export function statusFor(pushedAt: string, now = Date.now()): Status {
   const days = (now - new Date(pushedAt).getTime()) / 86400000;
   if (days <= 14) return "live";
-  if (days <= 120) return "ready";
+  if (days <= 365) return "ready";
   return "archive";
 }
 

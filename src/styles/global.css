@@ -586,3 +586,29 @@ h2 {
   .tally-dot, .wire.is-fresh li { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
+
+/* ---------- New-work flag and demo link ---------- */
+.slug-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; }
+.new-flag {
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px 1px;
+  border-radius: 3px;
+  background: var(--tally);
+  color: #fff;
+  position: relative;
+  top: -0.15em;
+}
+.demo-link {
+  position: relative;
+  z-index: 1; /* sits above the row's stretched link */
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--tally-ink);
+  text-decoration: underline;
+  align-self: center;
+  margin-left: 4px;
+}
+.demo-link:hover { color: var(--ink); }

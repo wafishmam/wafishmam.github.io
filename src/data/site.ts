@@ -18,16 +18,24 @@ export const site = {
     "I'm also deeply interested in AI, especially in finding practical ways it can boost productivity and make everyday work easier. On the side, I build AI-powered projects that put language models to work. Most recently, I built a research agent that investigates news topics, and I'm currently developing a sentiment dashboard that ingests articles and scores how coverage is trending.",
 };
 
-export type Featured = {
+// The A block is built from three sources, in this order:
+//  1. New work: your most recently created public repos, picked up automatically
+//     on each build (see `autoFeature`). Nothing to edit when you start a project.
+//  2. Pinned: the repos below. They stay featured no matter how old they get.
+//  3. Any repo with the GitHub topic `featured` (set it on GitHub, no code change).
+// Title, blurb and tags come from GitHub (README title and first paragraph,
+// repo description, topics, dependencies) unless you override them here.
+
+export type Pin = {
   repo: string;
-  title: string;
-  blurb: string;
-  tags: string[];
+  title?: string;
+  blurb?: string;
+  tags?: string[];
 };
 
-export const featured: Featured[] = [
+export const pinned: Pin[] = [
   {
-    repo: "news-research-agent",
+    repo: "news-agent",
     title: "News Research Agent",
     blurb:
       "An agentic research assistant for news topics. Built with LangGraph orchestration, ChromaDB retrieval, Tavily search, and Claude Haiku, served by a FastAPI backend with a lightweight React frontend.",
@@ -41,6 +49,19 @@ export const featured: Featured[] = [
     tags: ["FastAPI", "AWS SQS", "Claude", "SQLite", "React"],
   },
 ];
+
+export const autoFeature = {
+  /** How many of the newest repos to feature automatically. 0 turns it off. */
+  count: 2,
+  /** Only repos created within this many days count as new work. */
+  maxAgeDays: 365,
+  /** GitHub topic that pins a repo from GitHub's side. */
+  topic: "featured",
+};
+
+// Per-repo overrides for auto-featured work, keyed by repo name. Use this when the
+// repo name or README doesn't read well on the page.
+export const overrides: Record<string, Omit<Pin, "repo">> = {};
 
 // Hidden from the repository list (forks are excluded automatically).
 export const excludeRepos = [

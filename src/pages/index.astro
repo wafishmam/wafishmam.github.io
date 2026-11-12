@@ -2,8 +2,9 @@
 import "@fontsource-variable/schibsted-grotesk";
 import "@fontsource-variable/jetbrains-mono";
 import "../styles/global.css";
-import { site, featured, excludeRepos, about, stack } from "../data/site";
-import { getGithubData } from "../lib/github";
+import { site, pinned, autoFeature, overrides, excludeRepos, about, stack } from "../data/site";
+import { getGithubData, getRepoFiles } from "../lib/github";
+import { pickFeatured, describe } from "../lib/featured";
 import { relTime, statusFor, STATUS_LABEL, type Status } from "../lib/feed";
 
 const gh = await getGithubData(site.githubUsername);
@@ -20,23 +21,35 @@ type Row = {
   pushedAt: string | null;
   blurb?: string;
   tags?: string[];
+  isNew?: boolean;
+  demo?: string;
 };
 
-const featuredRows: Row[] = featured.map((f, i) => {
-  const r = byName.get(f.repo);
-  return {
-    pg: `A${i + 1}`,
-    slug: f.title,
-    url: r?.html_url ?? `${ghUrl}/${f.repo}`,
-    format: r?.language ?? f.tags[0],
-    status: r ? statusFor(r.pushed_at, now) : null,
-    pushedAt: r?.pushed_at ?? null,
-    blurb: f.blurb,
-    tags: f.tags,
-  };
-});
+const exclude = new Set(excludeRepos);
+const picks = pickFeatured({ repos: gh.repos, pinned, overrides, exclude, auto: autoFeature, now });
+const featuredRows: Row[] = await Promise.all(
+  picks.map(async (p, i) => {
+    const r = byName.get(p.name) ?? null;
+    // Only fetch README/deps when the copy isn't fully written by hand.
+    const needsFiles = !(p.pin?.title && p.pin?.blurb && p.pin?.tags);
+    const files = needsFiles && gh.ok ? await getRepoFiles(site.githubUsername, p.name) : null;
+    const d = describe(p.name, r, files, p.pin, p.isNew);
+    return {
+      pg: `A${i + 1}`,
+      slug: d.title,
+      url: r?.html_url ?? `${ghUrl}/${p.name}`,
+      format: r?.language ?? d.tags[0] ?? "—",
+      status: r ? statusFor(r.pushed_at, now) : null,
+      pushedAt: r?.pushed_at ?? null,
+      blurb: d.blurb,
+      tags: d.tags,
+      isNew: d.isNew,
+      demo: r?.homepage || undefined,
+    };
+  }),
+);
 
-const hidden = new Set([...excludeRepos, ...featured.map((f) => f.repo)]);
+const hidden = new Set([...excludeRepos, ...picks.map((p) => p.name)]);
 const repoRows: Row[] = gh.repos
   .filter((r) => !r.fork && !hidden.has(r.name))
   .map((r, i) => ({
@@ -155,9 +168,9 @@ const jsonLd = {
         <div class="section-head">
           <h2 id="rundown-title">Rundown</h2>
           <p class="section-note">
-            Featured segments first, then every public repo by last push.
+            Newest work leads automatically, followed by pinned projects, then every public repo by last push.
             Status comes from push recency: <span class="st st-live">On air</span> this fortnight,
-            <span class="st st-ready">Ready</span> within four months, <span class="st st-archive">Archive</span> before that.
+            <span class="st st-ready">Ready</span> within a year, <span class="st st-archive">Archive</span> before that.
           </p>
         </div>
 
@@ -175,9 +188,15 @@ const jsonLd = {
             <div class="sheet-row is-feature" role="row">
               <span role="cell" class="pg">{r.pg}</span>
               <span role="cell" class="slug">
-                <a href={r.url} rel="noopener" class="slug-link">{r.slug}</a>
-                <span class="blurb">{r.blurb}</span>
-                <span class="tags">{r.tags?.map((t) => <span class="tag">{t}</span>)}</span>
+                <span class="slug-line">
+                  <a href={r.url} rel="noopener" class="slug-link">{r.slug}</a>
+                  {r.isNew && <span class="new-flag">New</span>}
+                </span>
+                {r.blurb && <span class="blurb">{r.blurb}</span>}
+                <span class="tags">
+                  {r.tags?.map((t) => <span class="tag">{t}</span>)}
+                  {r.demo && <a class="demo-link" href={r.demo} rel="noopener">Live demo<span aria-hidden="true"> ↗</span></a>}
+                </span>
               </span>
               <span role="cell" class="fmt">{r.format}</span>
               <span role="cell">{r.status ? <span class={`st st-${r.status}`}>{STATUS_LABEL[r.status]}</span> : <span class="muted">—</span>}</span>

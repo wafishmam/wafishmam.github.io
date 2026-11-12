@@ -3,9 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Rebuild daily so the rundown's repo list and statuses stay current.
+  # Rebuild every 6 hours so new repos and statuses show up without a code change.
   schedule:
-    - cron: "17 10 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
